@@ -16,6 +16,7 @@
 package org.dasein.cloud.benchmark;
 
 import org.dasein.cloud.CloudProvider;
+import org.json.JSONObject;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -31,5 +32,5 @@ public interface Benchmark {
 
     public @Nonnull String getName();
 
-    public @Nonnull BenchmarkExecution execute(@Nonnull CloudProvider provider);
+    public @Nonnull BenchmarkExecution execute(@Nonnull CloudProvider provider, @Nonnull JSONObject cfg);
 }

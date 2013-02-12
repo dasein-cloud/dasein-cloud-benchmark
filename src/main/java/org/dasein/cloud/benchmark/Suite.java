@@ -24,7 +24,6 @@ import org.json.JSONObject;
 import javax.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,6 +41,7 @@ import java.util.Properties;
 public class Suite {
     static public void main(String ... args) throws Exception {
         ArrayList<Map<String,Object>> suites = new ArrayList<Map<String, Object>>();
+        ArrayList<Map<String,Object>> tests = new ArrayList<Map<String, Object>>();
 
         for( String suiteFile : args ) {
             HashMap<String,Object> suite = new HashMap<String, Object>();
@@ -69,55 +69,65 @@ public class Suite {
                 benchmarks.add((Benchmark)Class.forName(cname).newInstance());
             }
 
-            ArrayList<Map<String,Object>> tests = new ArrayList<Map<String, Object>>();
             JSONArray clouds = ob.getJSONArray("clouds");
 
             for( int i=0; i<clouds.length(); i++ ) {
                 JSONObject cloud = clouds.getJSONObject(i);
-                String cname = cloud.getString("providerClass");
-                CloudProvider provider = (CloudProvider)Class.forName(cname).newInstance();
-                JSONObject ctxCfg = cloud.getJSONObject("context");
-                ProviderContext ctx = new ProviderContext();
 
-                ctx.setAccountNumber(ctxCfg.getString("accountNumber"));
-                ctx.setRegionId(ctxCfg.getString("bootstrapRegionId"));
-                if( ctxCfg.has("accessPublic") ) {
-                    ctx.setAccessPublic(ctxCfg.getString("accessPublic").getBytes("utf-8"));
-                }
-                if( ctxCfg.has("accessPrivate") ) {
-                    ctx.setAccessPrivate(ctxCfg.getString("accessPrivate").getBytes("utf-8"));
-                }
-                ctx.setCloudName(ctxCfg.getString("cloudName"));
-                ctx.setProviderName(ctxCfg.getString("providerName"));
-                ctx.setEndpoint(ctxCfg.getString("endpoint"));
-                if( ctxCfg.has("x509Cert") ) {
-                    ctx.setX509Cert(ctxCfg.getString("x509Cert").getBytes("utf-8"));
-                }
-                if( ctxCfg.has("x509Key") ) {
-                    ctx.setX509Key(ctxCfg.getString("x509Key").getBytes("utf-8"));
-                }
-                if( ctxCfg.has("customProperties") ) {
-                    JSONObject p = ctxCfg.getJSONObject("customProperties");
-                    String[] names = JSONObject.getNames(p);
+                if( cloud.has("regions") ) {
+                    JSONObject regions = cloud.getJSONObject("regions");
+                    String[] regionIds = JSONObject.getNames(regions);
 
-                    if( names != null ) {
-                        Properties props = new Properties();
+                    if( regionIds != null ) {
+                        for( String regionId : regionIds ) {
+                            final JSONObject regionCfg = regions.getJSONObject(regionId);
+                            String cname = cloud.getString("providerClass");
+                            CloudProvider provider = (CloudProvider)Class.forName(cname).newInstance();
+                            JSONObject ctxCfg = cloud.getJSONObject("context");
+                            ProviderContext ctx = new ProviderContext();
 
-                        for( String name : names ) {
-                            String value = p.getString(name);
-
-                            if( value != null ) {
-                                props.put(name, value);
+                            ctx.setEndpoint(regionCfg.getString("endpoint"));
+                            ctx.setAccountNumber(ctxCfg.getString("accountNumber"));
+                            ctx.setRegionId(regionId);
+                            if( ctxCfg.has("accessPublic") ) {
+                                ctx.setAccessPublic(ctxCfg.getString("accessPublic").getBytes("utf-8"));
                             }
+                            if( ctxCfg.has("accessPrivate") ) {
+                                ctx.setAccessPrivate(ctxCfg.getString("accessPrivate").getBytes("utf-8"));
+                            }
+                            ctx.setCloudName(ctxCfg.getString("cloudName"));
+                            ctx.setProviderName(ctxCfg.getString("providerName"));
+                            if( ctxCfg.has("x509Cert") ) {
+                                ctx.setX509Cert(ctxCfg.getString("x509Cert").getBytes("utf-8"));
+                            }
+                            if( ctxCfg.has("x509Key") ) {
+                                ctx.setX509Key(ctxCfg.getString("x509Key").getBytes("utf-8"));
+                            }
+                            if( ctxCfg.has("customProperties") ) {
+                                JSONObject p = ctxCfg.getJSONObject("customProperties");
+                                String[] names = JSONObject.getNames(p);
+
+                                if( names != null ) {
+                                    Properties props = new Properties();
+
+                                    for( String name : names ) {
+                                        String value = p.getString(name);
+
+                                        if( value != null ) {
+                                            props.put(name, value);
+                                        }
+                                    }
+                                    ctx.setCustomProperties(props);
+                                }
+                            }
+                            provider.connect(ctx);
+
+                            Suite s = new Suite(benchmarks, provider);
+
+                            tests.add(s.runBenchmarks(regionCfg));
                         }
-                        ctx.setCustomProperties(props);
                     }
                 }
-                provider.connect(ctx);
-
-                Suite s = new Suite(benchmarks, provider);
-
-                tests.add(s.runBenchmarks());
             }
             suite.put("benchmarks", tests);
             suites.add(suite);
@@ -133,7 +143,7 @@ public class Suite {
         this.provider = provider;
     }
 
-    public Map<String,Object> runBenchmarks() throws IOException {
+    public Map<String,Object> runBenchmarks(JSONObject cfg) {
         HashMap<String,Object> map = new HashMap<String, Object>();
         ProviderContext ctx = provider.getContext();
 
@@ -148,7 +158,7 @@ public class Suite {
             map.put("endpoint", ctx.getEndpoint());
 
             for( Benchmark benchmark : benchmarks ) {
-                executions.add(toJSON(benchmark.execute(provider)));
+                executions.add(toJSON(benchmark.execute(provider, cfg)));
             }
             map.put("benchmarks", executions);
         }

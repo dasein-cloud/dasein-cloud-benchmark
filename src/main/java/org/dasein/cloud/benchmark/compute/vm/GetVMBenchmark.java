@@ -31,28 +31,27 @@ import javax.annotation.Nonnull;
  *
  * @author George Reese
  */
-public class ListVMsBenchmark implements Benchmark {
+public class GetVMBenchmark implements Benchmark {
     @Override
     public @Nonnull String getDescription() {
-        return "Tests the listing of virtual machines in a target cloud with baseline actionable data";
+        return "Tests the fetching of a known virtual machine in a target cloud with baseline actionable data.";
     }
 
     @Override
     public @Nonnull String getName() {
-        return "listVMs";
+        return "getVM";
     }
 
     @Override
     public @Nonnull BenchmarkExecution execute(@Nonnull CloudProvider provider, @Nonnull JSONObject cfg) {
-        String description = "List all virtual machines in a target cloud with baseline actionable data.";
-        String name = "listVMs";
+        String description = "Tests the fetching of a known virtual machine in a target cloud with baseline actionable data.";
+        String name = "getVM";
         long start = System.currentTimeMillis();
 
         try {
             //noinspection UnusedDeclaration,ConstantConditions
-            for( VirtualMachine vm : provider.getComputeServices().getVirtualMachineSupport().listVirtualMachines() ) {
-                // TODO: ignore
-            }
+            provider.getComputeServices().getVirtualMachineSupport().getVirtualMachine(cfg.getString("virtualMachineId"));
+
             long end = System.currentTimeMillis();
             Milestone m = Milestone.getInstance(name, description, start, end, null);
 

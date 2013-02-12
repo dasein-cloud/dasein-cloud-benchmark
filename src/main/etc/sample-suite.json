@@ -2,7 +2,7 @@
     "name":"VM Benchmarks",
     "description":"Benchmark suite for testing basic operations against cloud virtual machines.",
     "benchmarks":[
-            "org.dasein.cloud.benchmark.compute.vm.ListVMsBenchmark"
+            "org.dasein.cloud.benchmark.compute.vm.ListVMsBenchmark","org.dasein.cloud.benchmark.compute.vm.GetVMBenchmark"
     ],
     "clouds":[
         {
@@ -11,11 +11,20 @@
             {
                 "cloudName":"AWS",
                 "providerName":"AWS",
-                "endpoint":"https://ec2.us-east-1.amazonaws.com",
-                "bootstrapRegionId":"us-east-1",
                 "accountNumber":"AWS_ACCOUNT_NUMBER",
                 "accessPublic":"ACCESS_KEY_PUBLIC",
                 "accessPrivate":"ACCESS_KEY_PRIVATE"
+            },
+            "regions":{
+                "us-east-1":{
+                    "endpoint":"https://ec2.us-east-1.amazonaws.com",
+                    "dataCenterId":"us-east-1a",
+                    "productId":"m1.medium",
+                    "imageId":"ID_OF_MACHINE_IMAGE_TO_USE_IN_TESTING",
+                    "vlanId":"ID_OF_VPC_TO_USE_IN_TESTING_OPTIONAL",
+                    "subnetId":"ID_OF_SUBNET_TO_USE_IN_TESTING_OPTIONAL",
+                    "virtualMachineId":"ID_OF_VM_TO_USE_IN_TESTING"
+                }
             }
         }
     ]
