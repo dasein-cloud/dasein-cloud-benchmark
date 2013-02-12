@@ -1,0 +1,22 @@
+{
+    "name":"VM Benchmarks",
+    "description":"Benchmark suite for testing basic operations against cloud virtual machines.",
+    "benchmarks":[
+            "org.dasein.cloud.benchmark.compute.vm.ListVMsBenchmark"
+    ],
+    "clouds":[
+        {
+            "providerClass":"org.dasein.cloud.aws.AWSCloud",
+            "context":
+            {
+                "cloudName":"AWS",
+                "providerName":"AWS",
+                "endpoint":"https://ec2.us-east-1.amazonaws.com",
+                "bootstrapRegionId":"us-east-1",
+                "accountNumber":"AWS_ACCOUNT_NUMBER",
+                "accessPublic":"ACCESS_KEY_PUBLIC",
+                "accessPrivate":"ACCESS_KEY_PRIVATE"
+            }
+        }
+    ]
+}

@@ -32,7 +32,7 @@ import java.util.Collections;
  * @author George Reese
  */
 public class BenchmarkExecution {
-    public @Nonnull BenchmarkExecution getError(@Nonnull Benchmark benchmark, @Nonnull CloudProvider provider, @Nonnegative long startTimestamp, @Nonnegative long endTimestamp, @Nonnull Milestone ... milestones) {
+    static public @Nonnull BenchmarkExecution getError(@Nonnull Benchmark benchmark, @Nonnull CloudProvider provider, @Nonnegative long startTimestamp, @Nonnegative long endTimestamp, @Nonnull Milestone ... milestones) {
         BenchmarkExecution execution = new BenchmarkExecution();
 
         execution.benchmark = benchmark;
@@ -49,7 +49,7 @@ public class BenchmarkExecution {
         return execution;
     }
 
-    public @Nonnull BenchmarkExecution getSuccess(@Nonnull Benchmark benchmark, @Nonnull CloudProvider provider, @Nonnegative long startTimestamp, @Nonnegative long endTimestamp, @Nonnull Milestone ... milestones) {
+    static public @Nonnull BenchmarkExecution getSuccess(@Nonnull Benchmark benchmark, @Nonnull CloudProvider provider, @Nonnegative long startTimestamp, @Nonnegative long endTimestamp, @Nonnull Milestone ... milestones) {
         BenchmarkExecution execution = new BenchmarkExecution();
 
         execution.benchmark = benchmark;
